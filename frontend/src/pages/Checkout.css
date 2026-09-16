@@ -317,9 +317,10 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .checkout-page.container {
-    padding-top: 90px;
+    padding-top: 80px;
+    padding-bottom: 36px;
   }
 
   .checkout-header {
@@ -328,7 +329,12 @@
     gap: 8px;
   }
 
-  .checkout-form, .checkout-summary {
+  .checkout-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .checkout-form,
+  .checkout-summary {
     padding: 16px;
   }
 
@@ -342,7 +348,60 @@
     padding: 9px 11px;
   }
 
+  .summary-item {
+    gap: 10px;
+  }
+
+  .summary-item-info h4 {
+    font-size: 0.82rem;
+  }
+
+  .summary-item-price {
+    font-size: 0.82rem;
+  }
+
+  .place-order-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .checkout-page.container {
+    padding-top: 72px;
+  }
+
   .checkout-header h1 {
-    font-size: 1.45rem;
+    font-size: 1.35rem;
+  }
+
+  .checkout-form,
+  .checkout-summary {
+    padding: 14px;
+  }
+
+  .summary-item-img {
+    width: 42px;
+    height: 42px;
+  }
+
+  .summary-item-qty {
+    width: 15px;
+    height: 15px;
+    font-size: 0.6rem;
+  }
+
+  .summary-item-info p,
+  .total-row {
+    font-size: 0.78rem;
+  }
+
+  .final-total {
+    font-size: 1rem;
+  }
+
+  .payment-method {
+    padding: 10px;
+    font-size: 0.8rem;
   }
 }

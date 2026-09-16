@@ -58,15 +58,32 @@
 
 @media (max-width: 600px) {
   .toast-container {
-    right: 15px;
-    left: 15px;
-    bottom: 15px;
+    top: 92px;
+    right: auto;
+    left: 50%;
+    bottom: auto;
+    transform: translateX(-50%);
+    width: min(88vw, 360px);
     max-width: none;
+    align-items: center;
   }
 
   .toast {
+    width: 100%;
     text-align: center;
     font-size: 0.85rem;
     padding: 10px 16px;
+    animation: slideInTopToast 0.3s cubic-bezier(0.16, 1, 0.3, 1), fadeOutToast 0.3s ease-in 2.7s forwards;
+  }
+}
+
+@keyframes slideInTopToast {
+  from {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
