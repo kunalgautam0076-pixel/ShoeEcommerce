@@ -24,6 +24,15 @@ body {
   color: var(--text-light);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
 }
 
 a {

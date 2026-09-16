@@ -68,8 +68,8 @@ const Cart = () => {
           <div className="summary-row"><span>Subtotal</span><strong>{formatINR(cartTotal)}</strong></div>
           <div className="summary-row"><span>Delivery</span><span className="free-delivery">Free</span></div>
           <div className="summary-total"><span>Total</span><strong>{formatINR(cartTotal)}</strong></div>
-          <button className="checkout-btn" type="button">Proceed to Checkout</button>
-          <p className="checkout-note">Checkout will be available after payment details are connected.</p>
+          <Link to="/checkout" className="btn checkout-btn" style={{ display: 'block', textAlign: 'center', marginTop: '15px' }}>Proceed to Checkout</Link>
+          <p className="checkout-note">Secure checkout via Stripe / Card.</p>
         </aside>
       </div>
     </main>

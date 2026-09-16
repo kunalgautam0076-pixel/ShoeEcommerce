@@ -6,7 +6,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { cartCount } = useCart();
+  const { cartCount, openCartDrawer } = useCart();
 
   const toggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -32,10 +32,10 @@ const Navbar = () => {
 
         <div className="nav-icons">
           <Link to="/profile" className="icon-btn" onClick={closeMenu}><User size={20} /></Link>
-          <Link to="/cart" className="icon-btn cart-btn" onClick={closeMenu}>
+          <button className="icon-btn cart-btn" onClick={() => { closeMenu(); openCartDrawer(); }}>
             <ShoppingCart size={20} />
-            <span className="cart-badge">{cartCount}</span>
-          </Link>
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </button>
           <button className="icon-btn mobile-menu" onClick={toggleMenu}>
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

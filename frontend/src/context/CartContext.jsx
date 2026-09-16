@@ -17,10 +17,14 @@ const readStoredCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(readStoredCart);
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
+
+  const openCartDrawer = () => setIsCartDrawerOpen(true);
+  const closeCartDrawer = () => setIsCartDrawerOpen(false);
 
   const addToCart = (product, size) => {
     const productId = getProductId(product);
@@ -78,6 +82,9 @@ export const CartProvider = ({ children }) => {
       cartItems,
       cartCount,
       cartTotal,
+      isCartDrawerOpen,
+      openCartDrawer,
+      closeCartDrawer,
       addToCart,
       updateQuantity,
       removeFromCart,
