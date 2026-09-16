@@ -54,20 +54,59 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
+  const sendOTP = async (userData) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch('http://localhost:5000/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Backend server is not running on port 5000.');
+      }
       
       if (!res.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || 'Failed to send OTP');
+      }
+
+      setLoading(false);
+      showToast(data.message, 'success');
+      return { success: true, identifier: data.identifier, mockOtp: data.mockOtp };
+    } catch (err) {
+      setLoading(false);
+      setError(err.message);
+      showToast(err.message, 'error');
+      return { success: false, error: err.message };
+    }
+  };
+
+  const verifyOTPAndRegister = async (identifier, otp) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, otp })
+      });
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Backend server error.');
+      }
+      
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid OTP');
       }
 
       setUser(data);
@@ -93,7 +132,8 @@ export const AuthProvider = ({ children }) => {
       loading,
       error,
       login,
-      register,
+      sendOTP,
+      verifyOTPAndRegister,
       logout,
       isAuthenticated: !!user
     }}>
