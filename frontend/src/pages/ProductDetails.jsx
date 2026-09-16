@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Check, Heart, ShoppingCart, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
+import { formatINR } from '../utils/currency';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
@@ -28,6 +29,7 @@ const ProductDetails = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState(null);
   const [showMobileStickyAdd, setShowMobileStickyAdd] = useState(true);
+  const [showPurchaseLimit, setShowPurchaseLimit] = useState(false);
   const actionButtonsRef = useRef(null);
   const [isFavourite, setIsFavourite] = useState(false);
 
@@ -96,6 +98,16 @@ const ProductDetails = () => {
     if (!selectedSize) {
       setFeedbackType('warning');
       setAddedMessage('Please select a size before adding to bag.');
+      return;
+    }
+
+    const productId = product._id || product.id;
+    const alreadyAdded = cartItems.some((item) => (
+      item.productId === productId && item.size === selectedSize
+    ));
+
+    if (alreadyAdded) {
+      setShowPurchaseLimit(true);
       return;
     }
 
@@ -264,7 +276,7 @@ const ProductDetails = () => {
             </p>
             
             <p className="product-price">
-              ${product.price.toFixed(2)}
+              {formatINR(product.price)}
               <span className="tax-info">Inclusive of all taxes</span>
             </p>
 
@@ -362,6 +374,17 @@ const ProductDetails = () => {
         </div>
       )}
 
+      {showPurchaseLimit && (
+        <div className="purchase-limit-backdrop" role="presentation">
+          <section className="purchase-limit-modal" role="alertdialog" aria-modal="true" aria-labelledby="purchase-limit-title">
+            <p id="purchase-limit-title">
+              You have already purchased this style, which is part of a special collection and limited to 1 unit per customer.
+            </p>
+            <button type="button" onClick={() => setShowPurchaseLimit(false)}>Got It</button>
+          </section>
+        </div>
+      )}
+
       {showMiniCart && lastAddedItem && (
         <aside className="mini-cart" aria-label="Shopping bag preview">
           <div className="mini-cart-header">
@@ -376,7 +399,7 @@ const ProductDetails = () => {
               <strong>{lastAddedItem.name}</strong>
               <span>{lastAddedItem.brand} {lastAddedItem.category} Shoes (UK {lastAddedItem.size})</span>
               <span>Size UK {lastAddedItem.size}</span>
-              <strong>${lastAddedItem.price.toFixed(2)}</strong>
+              <strong>{formatINR(lastAddedItem.price)}</strong>
               <span>Inclusive of all taxes</span>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { formatINR } from '../utils/currency';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
@@ -15,7 +16,7 @@ const ProductCard = ({ product }) => {
           <h3 className="product-title">{product.name}</h3>
           <p className="product-brand">{product.brand}</p>
           <div className="price-row">
-            <p className="price">${product.price.toFixed(2)}</p>
+            <p className="price">{formatINR(product.price)}</p>
             {/* Using a div instead of button inside a Link to avoid hydration/click issues */}
             <div className="add-cart-btn"><ShoppingCart size={18} /></div>
           </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { formatINR } from '../utils/currency';
 import './Cart.css';
 
 const Cart = () => {
@@ -47,7 +48,7 @@ const Cart = () => {
                 </button>
               </div>
               <div className="cart-item-actions">
-                <strong>${item.price.toFixed(2)}</strong>
+                <strong>{formatINR(item.price)}</strong>
                 <div className="quantity-control" aria-label={`Quantity for ${item.name}`}>
                   <button type="button" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} aria-label="Decrease quantity">
                     <Minus size={15} />
@@ -64,9 +65,9 @@ const Cart = () => {
 
         <aside className="cart-summary glass-panel">
           <h2>Summary</h2>
-          <div className="summary-row"><span>Subtotal</span><strong>${cartTotal.toFixed(2)}</strong></div>
+          <div className="summary-row"><span>Subtotal</span><strong>{formatINR(cartTotal)}</strong></div>
           <div className="summary-row"><span>Delivery</span><span className="free-delivery">Free</span></div>
-          <div className="summary-total"><span>Total</span><strong>${cartTotal.toFixed(2)}</strong></div>
+          <div className="summary-total"><span>Total</span><strong>{formatINR(cartTotal)}</strong></div>
           <button className="checkout-btn" type="button">Proceed to Checkout</button>
           <p className="checkout-note">Checkout will be available after payment details are connected.</p>
         </aside>
