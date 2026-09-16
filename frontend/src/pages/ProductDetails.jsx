@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Truck, Undo2, X } from 'lucide-react';
+import { Heart, Minus, Plus, ShoppingCart, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import './ProductDetails.css';
@@ -8,7 +8,7 @@ import './ProductDetails.css';
 const ProductDetails = () => {
   const { id } = useParams();
   const { products, loading, error } = useContext(ProductContext);
-  const { addToCart } = useCart();
+  const { addToCart, cartItems, updateQuantity } = useCart();
   const [product, setProduct] = useState(null);
   
   // Image Zoom States
@@ -24,6 +24,9 @@ const ProductDetails = () => {
   const [pincode, setPincode] = useState('');
   const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [addedMessage, setAddedMessage] = useState('');
+  const [feedbackType, setFeedbackType] = useState('success');
+  const [showMiniCart, setShowMiniCart] = useState(false);
+  const [isFavourite, setIsFavourite] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -88,12 +91,27 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      setAddedMessage('Please select a size first.');
+      setFeedbackType('warning');
+      setAddedMessage('Please select a size before adding to bag.');
       return;
     }
 
     addToCart(product, selectedSize);
+    setFeedbackType('success');
     setAddedMessage(`Added UK ${selectedSize} to your bag.`);
+    setShowMiniCart(true);
+  };
+
+  const handleFavourite = () => {
+    if (!selectedSize) {
+      setFeedbackType('warning');
+      setAddedMessage('Please select a size before adding to favourites.');
+      return;
+    }
+
+    setIsFavourite((currentValue) => !currentValue);
+    setFeedbackType('success');
+    setAddedMessage(isFavourite ? 'Removed from favourites.' : 'Added to favourites.');
   };
 
   if (loading) return <div className="page-container container"><p>Loading...</p></div>;
@@ -242,12 +260,12 @@ const ProductDetails = () => {
               <button className="add-to-bag-btn" onClick={handleAddToCart}>
                 Add to Bag
               </button>
-              <button className="favourite-btn">
-                Favourite <Heart size={20} />
+              <button className={`favourite-btn ${isFavourite ? 'favourite-selected' : ''}`} onClick={handleFavourite}>
+                {isFavourite ? 'Favourited' : 'Favourite'} <Heart size={20} fill={isFavourite ? 'currentColor' : 'none'} />
               </button>
             </div>
 
-            {addedMessage && <p className="cart-feedback" role="status">{addedMessage}</p>}
+            {addedMessage && <p className={`cart-feedback ${feedbackType}`} role="status">{addedMessage}</p>}
 
             <div className="product-description">
               <p>{product.description}</p>
@@ -305,6 +323,44 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {showMiniCart && selectedSize && (() => {
+        const productId = product._id || product.id;
+        const miniCartItem = cartItems.find((item) => item.productId === productId && item.size === selectedSize);
+
+        if (!miniCartItem) return null;
+
+        return (
+          <aside className="mini-cart" aria-label="Added product preview">
+            <div className="mini-cart-header">
+              <span><ShoppingCart size={17} /> Added to bag</span>
+              <button type="button" onClick={() => setShowMiniCart(false)} aria-label="Close added product preview">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mini-cart-product">
+              <img src={miniCartItem.image} alt={miniCartItem.name} />
+              <div>
+                <strong>{miniCartItem.name}</strong>
+                <span>UK {miniCartItem.size}</span>
+                <span>${miniCartItem.price.toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="mini-cart-footer">
+              <div className="mini-quantity" aria-label="Mini cart quantity">
+                <button type="button" onClick={() => updateQuantity(miniCartItem.itemId, miniCartItem.quantity - 1)} aria-label="Decrease quantity">
+                  <Minus size={14} />
+                </button>
+                <span>{miniCartItem.quantity}</span>
+                <button type="button" onClick={() => updateQuantity(miniCartItem.itemId, miniCartItem.quantity + 1)} aria-label="Increase quantity">
+                  <Plus size={14} />
+                </button>
+              </div>
+              <Link className="mini-cart-link" to="/cart" onClick={() => setShowMiniCart(false)}>View Bag</Link>
+            </div>
+          </aside>
+        );
+      })()}
 
       {showSizeGuide && (
         <div
