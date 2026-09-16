@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { cartCount, openCartDrawer } = useCart();
+  const { isAuthenticated } = useAuth();
 
   const toggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -31,7 +33,9 @@ const Navbar = () => {
         </ul>
 
         <div className="nav-icons">
-          <Link to="/profile" className="icon-btn" onClick={closeMenu}><User size={20} /></Link>
+          <Link to={isAuthenticated ? "/profile" : "/login"} className="icon-btn" onClick={closeMenu} title={isAuthenticated ? "Profile" : "Sign In"}>
+            <User size={20} />
+          </Link>
           <button className="icon-btn cart-btn" onClick={() => { closeMenu(); openCartDrawer(); }}>
             <ShoppingCart size={20} />
             {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
