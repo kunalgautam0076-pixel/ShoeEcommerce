@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Check, Heart, ShoppingCart, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
@@ -27,6 +27,8 @@ const ProductDetails = () => {
   const [feedbackType, setFeedbackType] = useState('success');
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState(null);
+  const [showMobileStickyAdd, setShowMobileStickyAdd] = useState(true);
+  const actionButtonsRef = useRef(null);
   const [isFavourite, setIsFavourite] = useState(false);
 
   useEffect(() => {
@@ -118,6 +120,19 @@ const ProductDetails = () => {
     const dismissTimer = window.setTimeout(() => setShowMiniCart(false), 5000);
     return () => window.clearTimeout(dismissTimer);
   }, [showMiniCart, lastAddedItem]);
+
+  useEffect(() => {
+    const actionButtons = actionButtonsRef.current;
+    if (!actionButtons) return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowMobileStickyAdd(!entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+
+    observer.observe(actionButtons);
+    return () => observer.disconnect();
+  }, [product]);
 
   const handleFavourite = () => {
     if (!selectedSize) {
@@ -273,7 +288,7 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            <div className={`action-buttons ${showMiniCart ? 'action-sheet-open' : ''}`}>
+            <div className="action-buttons" ref={actionButtonsRef}>
               <button className="add-to-bag-btn" onClick={handleAddToCart}>
                 Add to Bag
               </button>
@@ -340,6 +355,12 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {showMobileStickyAdd && !showMiniCart && (
+        <div className="mobile-sticky-add">
+          <button className="add-to-bag-btn" onClick={handleAddToCart}>Add to Bag</button>
+        </div>
+      )}
 
       {showMiniCart && lastAddedItem && (
         <aside className="mini-cart" aria-label="Shopping bag preview">

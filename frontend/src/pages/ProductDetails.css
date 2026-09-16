@@ -585,29 +585,28 @@
   }
 
   .action-buttons {
+    position: static;
+    display: flex;
+    margin-bottom: 40px;
+    padding: 0;
+    background: transparent;
+    border-top: 0;
+  }
+
+  .mobile-sticky-add {
     position: fixed;
     right: 0;
     bottom: 0;
     left: 0;
     z-index: 1050;
-    display: block;
-    margin: 0;
     padding: 10px 16px 14px;
     background: rgba(15, 23, 42, 0.96);
     border-top: 1px solid var(--glass-border);
   }
 
-  .action-buttons.action-sheet-open {
-    display: none;
-  }
-
-  .action-buttons .add-to-bag-btn {
+  .mobile-sticky-add .add-to-bag-btn {
     width: 100%;
     padding: 15px 18px;
-  }
-
-  .action-buttons .favourite-btn {
-    display: none;
   }
 
   .product-details-page.container {
