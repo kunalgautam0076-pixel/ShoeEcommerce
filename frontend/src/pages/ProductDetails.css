@@ -283,19 +283,24 @@
   top: 108px;
   right: 20px;
   z-index: 1100;
-  width: min(320px, calc(100vw - 40px));
-  max-height: min(70vh, 520px);
-  overflow-y: auto;
-  scrollbar-width: none;
-  padding: 16px;
+  width: min(360px, calc(100vw - 40px));
+  padding: 18px;
   border: 1px solid var(--glass-border);
-  border-radius: 14px;
-  background: rgba(30, 41, 59, 0.97);
+  border-radius: 16px;
+  background: rgba(30, 41, 59, 0.98);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+  animation: mini-cart-in 0.22s ease-out;
 }
 
-.mini-cart::-webkit-scrollbar {
-  display: none;
+@keyframes mini-cart-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mini-cart-header,
@@ -320,6 +325,13 @@
   gap: 8px;
 }
 
+.mini-cart-header span svg {
+  padding: 3px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: white;
+}
+
 .mini-cart-header button {
   display: grid;
   place-items: center;
@@ -334,29 +346,17 @@
   color: var(--text-light);
 }
 
-.mini-cart-items {
-  display: grid;
-  max-height: 208px;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-
-.mini-cart-items::-webkit-scrollbar {
-  display: none;
-}
-
 .mini-cart-product {
   display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   padding: 14px 0;
-  border-bottom: 1px solid var(--glass-border);
 }
 
 .mini-cart-product img {
-  width: 68px;
-  height: 68px;
+  width: 92px;
+  height: 92px;
   border-radius: 8px;
   background: var(--bg-dark-secondary);
   object-fit: cover;
@@ -385,40 +385,6 @@
   font-size: 0.82rem;
 }
 
-.mini-cart-item-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 7px;
-}
-
-.mini-quantity {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 6px;
-  border: 1px solid var(--glass-border);
-  border-radius: 7px;
-  background: var(--bg-dark-secondary);
-}
-
-.mini-quantity button {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-light);
-  cursor: pointer;
-}
-
-.mini-quantity button:hover {
-  color: var(--primary);
-}
-
 .mini-cart-link {
   display: block;
   margin-top: 14px;
@@ -433,30 +399,6 @@
 
 .mini-cart-link:hover {
   background: var(--primary-hover);
-}
-
-.mini-remove {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--primary);
-  font-size: 0.9rem;
-  cursor: pointer;
-  font-size: 0.75rem;
-}
-
-.mini-remove:hover {
-  color: var(--text-light);
-}
-
-.mini-cart-total {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 14px;
-  color: var(--text-light);
-  font-size: 1rem;
-  font-weight: 700;
 }
 
 .product-description {
@@ -641,6 +583,36 @@
   .product-info-container {
     grid-column: auto;
   }
+
+  .action-buttons {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+    display: block;
+    margin: 0;
+    padding: 10px 16px 14px;
+    background: rgba(15, 23, 42, 0.96);
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .action-buttons.action-sheet-open {
+    display: none;
+  }
+
+  .action-buttons .add-to-bag-btn {
+    width: 100%;
+    padding: 15px 18px;
+  }
+
+  .action-buttons .favourite-btn {
+    display: none;
+  }
+
+  .product-details-page.container {
+    padding-bottom: 112px;
+  }
 }
 
 .size-guide-backdrop {
@@ -812,8 +784,40 @@
   }
 
   .mini-cart {
-    top: 88px;
-    right: 12px;
-    width: calc(100vw - 24px);
+    top: auto;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 20px 18px 24px;
+    border-right: 0;
+    border-bottom: 0;
+    border-radius: 22px 22px 0 0;
+    background: #fff;
+    color: #111;
+    box-shadow: 0 -14px 35px rgba(0, 0, 0, 0.24);
+  }
+
+  .mini-cart-header {
+    color: #111;
+  }
+
+  .mini-cart-header button {
+    color: #334155;
+  }
+
+  .mini-cart-product strong {
+    color: #111;
+  }
+
+  .mini-cart-product-details > span {
+    color: #64748b;
+  }
+
+  .mini-cart-link {
+    background: #111;
+  }
+
+  .mini-cart-link:hover {
+    background: #27272a;
   }
 }

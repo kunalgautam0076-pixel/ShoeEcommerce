@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, Minus, Plus, ShoppingCart, Truck, Undo2, X } from 'lucide-react';
+import { Check, Heart, ShoppingCart, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import './ProductDetails.css';
@@ -8,7 +8,7 @@ import './ProductDetails.css';
 const ProductDetails = () => {
   const { id } = useParams();
   const { products, loading, error } = useContext(ProductContext);
-  const { addToCart, cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
+  const { addToCart, cartItems, cartCount } = useCart();
   const [product, setProduct] = useState(null);
   
   // Image Zoom States
@@ -26,6 +26,7 @@ const ProductDetails = () => {
   const [addedMessage, setAddedMessage] = useState('');
   const [feedbackType, setFeedbackType] = useState('success');
   const [showMiniCart, setShowMiniCart] = useState(false);
+  const [lastAddedItem, setLastAddedItem] = useState(null);
   const [isFavourite, setIsFavourite] = useState(false);
 
   useEffect(() => {
@@ -97,10 +98,26 @@ const ProductDetails = () => {
     }
 
     addToCart(product, selectedSize);
+    setLastAddedItem({
+      itemId: `${product._id || product.id}-${selectedSize}`,
+      name: product.name,
+      category: product.category,
+      brand: product.brand,
+      image: product.image,
+      price: product.price,
+      size: selectedSize
+    });
     setFeedbackType('success');
     setAddedMessage(`Added UK ${selectedSize} to your bag.`);
     setShowMiniCart(true);
   };
+
+  useEffect(() => {
+    if (!showMiniCart) return undefined;
+
+    const dismissTimer = window.setTimeout(() => setShowMiniCart(false), 5000);
+    return () => window.clearTimeout(dismissTimer);
+  }, [showMiniCart, lastAddedItem]);
 
   const handleFavourite = () => {
     if (!selectedSize) {
@@ -256,7 +273,7 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            <div className="action-buttons">
+            <div className={`action-buttons ${showMiniCart ? 'action-sheet-open' : ''}`}>
               <button className="add-to-bag-btn" onClick={handleAddToCart}>
                 Add to Bag
               </button>
@@ -324,43 +341,27 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {showMiniCart && cartItems.length > 0 && (
+      {showMiniCart && lastAddedItem && (
         <aside className="mini-cart" aria-label="Shopping bag preview">
           <div className="mini-cart-header">
-            <span><ShoppingCart size={17} /> Your bag ({cartItems.length})</span>
+            <span><Check size={18} /> Added to Bag</span>
             <button type="button" onClick={() => setShowMiniCart(false)} aria-label="Close shopping bag preview">
               <X size={18} />
             </button>
           </div>
-          <div className="mini-cart-items">
-            {cartItems.map((item) => (
-              <div className="mini-cart-product" key={item.itemId}>
-                <img src={item.image} alt={item.name} />
-                <div className="mini-cart-product-details">
-                  <strong>{item.name}</strong>
-                  <span>UK {item.size}</span>
-                  <span>${item.price.toFixed(2)}</span>
-                  <div className="mini-cart-item-footer">
-                    <div className="mini-quantity" aria-label={`Quantity for ${item.name}`}>
-                      <button type="button" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} aria-label="Decrease quantity">
-                        <Minus size={14} />
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(item.itemId, item.quantity + 1)} aria-label="Increase quantity">
-                        <Plus size={14} />
-                      </button>
-                    </div>
-                    <button className="mini-remove" type="button" onClick={() => removeFromCart(item.itemId)}>Remove</button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="mini-cart-product">
+            <img src={lastAddedItem.image} alt={lastAddedItem.name} />
+            <div className="mini-cart-product-details">
+              <strong>{lastAddedItem.name}</strong>
+              <span>{lastAddedItem.brand} {lastAddedItem.category} Shoes (UK {lastAddedItem.size})</span>
+              <span>Size UK {lastAddedItem.size}</span>
+              <strong>${lastAddedItem.price.toFixed(2)}</strong>
+              <span>Inclusive of all taxes</span>
+            </div>
           </div>
-          <div className="mini-cart-total">
-            <span>Total</span>
-            <strong>${cartTotal.toFixed(2)}</strong>
-          </div>
-          <Link className="mini-cart-link" to="/cart" onClick={() => setShowMiniCart(false)}>View Bag</Link>
+          <Link className="mini-cart-link" to="/cart" onClick={() => setShowMiniCart(false)}>
+            View Bag ({cartCount})
+          </Link>
         </aside>
       )}
 
