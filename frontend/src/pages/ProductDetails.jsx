@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Truck, Undo2 } from 'lucide-react';
+import { Heart, ShoppingBag, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import './ProductDetails.css';
 
@@ -17,6 +17,8 @@ const ProductDetails = () => {
   
   // Selected state
   const [selectedSize, setSelectedSize] = useState(null);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [sizeUnit, setSizeUnit] = useState('in');
   const [pincode, setPincode] = useState('');
   const [deliveryInfo, setDeliveryInfo] = useState(null);
 
@@ -28,6 +30,22 @@ const ProductDetails = () => {
       setSelectedImgIndex(0); // Reset on product change
     }
   }, [id, products, loading]);
+
+  useEffect(() => {
+    if (!showSizeGuide) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setShowSizeGuide(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showSizeGuide]);
 
   const handleCheckPincode = async () => {
     if (!pincode || pincode.trim().length < 5) {
@@ -122,7 +140,16 @@ const ProductDetails = () => {
     });
   };
 
-  const defaultSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [6, 7, 8, 9, 10, 11];
+  const defaultSizes = [6, 7, 8, 9, 10, 11, 12];
+  const sizeGuideRows = [
+    { uk: 'UK 6 (EU 40)', inches: '9.6', cm: '24.5', us: '7', eu: '40', jp: '25' },
+    { uk: 'UK 7', inches: '10', cm: '25.4', us: '8', eu: '41', jp: '26' },
+    { uk: 'UK 8', inches: '10.3', cm: '26.2', us: '9', eu: '42.5', jp: '27' },
+    { uk: 'UK 9', inches: '10.7', cm: '27.1', us: '10', eu: '44', jp: '28' },
+    { uk: 'UK 10', inches: '11', cm: '27.9', us: '11', eu: '45', jp: '29' },
+    { uk: 'UK 11', inches: '11.3', cm: '28.8', us: '12', eu: '46', jp: '30' },
+    { uk: 'UK 12', inches: '11.7', cm: '29.6', us: '13', eu: '47.5', jp: '31' }
+  ];
 
   return (
     <div className="product-details-page container">
@@ -174,7 +201,9 @@ const ProductDetails = () => {
           <div className={`info-content ${showZoom ? 'hidden-opacity' : ''}`}>
             <p className="brand-label">Just In - {product.brand}</p>
             <h1 className="product-title">{product.name}</h1>
-            <p className="product-category">{product.category} Shoes</p>
+            <p className="product-category">
+              {product.category} Shoes{selectedSize ? ` (UK ${selectedSize})` : ''}
+            </p>
             
             <p className="product-price">
               ${product.price.toFixed(2)}
@@ -184,7 +213,9 @@ const ProductDetails = () => {
             <div className="size-section">
               <div className="size-header">
                 <span className="select-size-label">Select Size</span>
-                <span className="size-guide">Size Guide</span>
+                <button className="size-guide" type="button" onClick={() => setShowSizeGuide(true)}>
+                  Size Guide
+                </button>
               </div>
               <div className="size-grid">
                 {defaultSizes.map(size => (
@@ -264,6 +295,59 @@ const ProductDetails = () => {
           </div>
         </div>
       </div>
+
+      {showSizeGuide && (
+        <div
+          className="size-guide-backdrop"
+          role="presentation"
+          onMouseDown={(event) => event.target === event.currentTarget && setShowSizeGuide(false)}
+        >
+          <section className="size-guide-modal" role="dialog" aria-modal="true" aria-labelledby="size-guide-title">
+            <div className="size-guide-heading">
+              <div>
+                <h2 id="size-guide-title">Size Guide</h2>
+                <p>{product.brand} {product.name} Men's {product.category} Shoes</p>
+              </div>
+              <button className="size-guide-close" type="button" onClick={() => setShowSizeGuide(false)} aria-label="Close size guide">
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="size-guide-toolbar">
+              <p>Below are product&apos;s physical dimensions</p>
+              <div className="unit-toggle" role="group" aria-label="Measurement unit">
+                <button className={sizeUnit === 'in' ? 'active' : ''} type="button" onClick={() => setSizeUnit('in')}>in</button>
+                <button className={sizeUnit === 'cm' ? 'active' : ''} type="button" onClick={() => setSizeUnit('cm')}>cm</button>
+              </div>
+            </div>
+
+            <div className="size-guide-table-wrapper">
+              <table className="size-guide-table">
+                <thead>
+                  <tr>
+                    <th>Size</th>
+                    <th>Product Foot Length</th>
+                    <th>Product US Size</th>
+                    <th>Product EU Size</th>
+                    <th>Product CM/JP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sizeGuideRows.map((row) => (
+                    <tr key={row.uk}>
+                      <th scope="row">{row.uk}</th>
+                      <td>{sizeUnit === 'in' ? row.inches : row.cm}</td>
+                      <td>{row.us}</td>
+                      <td>{row.eu}</td>
+                      <td>{row.jp}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
