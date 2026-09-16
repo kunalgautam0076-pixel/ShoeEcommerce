@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const twilio = require('twilio');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -37,10 +38,26 @@ const sendOTP = async (req, res) => {
 
     console.log(`[Mock SMS/Email] OTP for ${identifier} is: ${otp}`);
 
+    // ----- TWILIO SMS INTEGRATION -----
+    if (phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+      try {
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        await client.messages.create({
+          body: `Your ShoeX verification code is: ${otp}`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: phone
+        });
+        console.log(`Real SMS sent to ${phone}`);
+      } catch (smsError) {
+        console.error('Failed to send real SMS:', smsError);
+        // We continue so the user isn't totally blocked if Twilio is misconfigured
+      }
+    }
+
     res.status(200).json({ 
       message: 'OTP sent successfully', 
       identifier,
-      mockOtp: otp // Sending it back for testing purposes so we can auto-fill or show it
+      mockOtp: otp // Sending it back for testing purposes
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
