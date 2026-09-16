@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useToast } from './ToastContext';
 
 export const AuthContext = createContext(null);
 
@@ -15,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(readStoredUser);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -42,10 +44,12 @@ export const AuthProvider = ({ children }) => {
 
       setUser(data);
       setLoading(false);
+      showToast(`Welcome back, ${data.firstName}!`, 'success');
       return { success: true };
     } catch (err) {
       setLoading(false);
       setError(err.message);
+      showToast(err.message, 'error');
       return { success: false, error: err.message };
     }
   };
@@ -68,16 +72,19 @@ export const AuthProvider = ({ children }) => {
 
       setUser(data);
       setLoading(false);
+      showToast('Registration successful! Welcome to ShoeX.', 'success');
       return { success: true };
     } catch (err) {
       setLoading(false);
       setError(err.message);
+      showToast(err.message, 'error');
       return { success: false, error: err.message };
     }
   };
 
   const logout = () => {
     setUser(null);
+    showToast('You have been logged out.', 'info');
   };
 
   return (

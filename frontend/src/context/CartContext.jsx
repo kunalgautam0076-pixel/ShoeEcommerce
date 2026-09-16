@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useToast } from './ToastContext';
 
 const CART_STORAGE_KEY = 'shoe-x-cart';
 
@@ -18,6 +19,7 @@ const readStoredCart = () => {
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(readStoredCart);
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -34,6 +36,7 @@ export const CartProvider = ({ children }) => {
       const existingItem = currentItems.find((item) => item.itemId === itemId);
 
       if (existingItem) {
+        showToast(`Increased quantity of ${product.name} (Size: ${size})`, 'success');
         return currentItems.map((item) => (
           item.itemId === itemId
             ? { ...item, quantity: item.quantity + 1 }
@@ -41,6 +44,7 @@ export const CartProvider = ({ children }) => {
         ));
       }
 
+      showToast(`Added ${product.name} (Size: ${size}) to cart!`, 'success');
       return [
         ...currentItems,
         {
