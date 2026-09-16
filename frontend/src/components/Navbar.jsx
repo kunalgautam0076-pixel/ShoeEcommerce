@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Menu, X } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { cartCount } = useCart();
 
   const toggleMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -32,7 +34,7 @@ const Navbar = () => {
           <Link to="/profile" className="icon-btn" onClick={closeMenu}><User size={20} /></Link>
           <Link to="/cart" className="icon-btn cart-btn" onClick={closeMenu}>
             <ShoppingCart size={20} />
-            <span className="cart-badge">0</span>
+            <span className="cart-badge">{cartCount}</span>
           </Link>
           <button className="icon-btn mobile-menu" onClick={toggleMenu}>
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}

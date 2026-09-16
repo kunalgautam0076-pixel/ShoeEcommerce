@@ -226,6 +226,13 @@
   margin-bottom: 40px;
 }
 
+.cart-feedback {
+  margin: -24px 0 32px;
+  color: #86efac;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .add-to-bag-btn {
   background-color: var(--primary);
   color: white;

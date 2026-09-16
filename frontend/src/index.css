@@ -103,6 +103,7 @@ h1 {
 .page-container { padding-top: 120px; min-height: 80vh; }
 .page-header { text-align: center; margin-bottom: 50px; }
 .page-header p { color: var(--text-muted); margin-top: 10px; }
+.data-notice { margin: 0 auto 24px; padding: 10px 14px; border: 1px solid rgba(249, 115, 22, 0.35); border-radius: 8px; background: rgba(249, 115, 22, 0.1); color: #fdba74; text-align: center; }
 
 .filter-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
 .filter-btn { padding: 8px 20px; background: transparent; border: 1px solid var(--glass-border); color: var(--text-light); border-radius: 20px; cursor: pointer; transition: var(--transition); }

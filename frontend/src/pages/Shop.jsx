@@ -3,7 +3,7 @@ import ProductCard from '../components/ProductCard';
 import { ProductContext } from '../context/ProductContext';
 
 const Shop = () => {
-  const { products, loading } = useContext(ProductContext);
+  const { products, loading, error } = useContext(ProductContext);
 
   return (
     <div className="page-container container">
@@ -11,6 +11,8 @@ const Shop = () => {
         <h1>All <span className="highlight">Shoes</span></h1>
         <p>Explore our entire collection of premium footwear.</p>
       </div>
+
+      {error && <p className="data-notice" role="status">Live product service is unavailable. Showing demo products.</p>}
       
       {loading ? (
          <p style={{textAlign: 'center'}}>Loading products...</p>

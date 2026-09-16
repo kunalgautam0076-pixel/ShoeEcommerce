@@ -12,6 +12,7 @@ const AddProduct = () => {
     description: '',
     price: '',
     image: '',
+    images: '',
     brand: '',
     category: defaultCategories[0]
   });
@@ -39,7 +40,11 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const dataToSubmit = { ...formData, price: Number(formData.price) };
+      const dataToSubmit = {
+        ...formData,
+        price: Number(formData.price),
+        images: formData.images.split(',').map((image) => image.trim()).filter(Boolean)
+      };
       await axios.post('http://localhost:5000/api/products', dataToSubmit);
       alert('Product Added Successfully');
       navigate('/');
@@ -72,6 +77,10 @@ const AddProduct = () => {
           <div className="form-group">
             <label>Image URL</label>
             <input type="text" name="image" className="form-control" required onChange={handleChange} />
+          </div>
+          <div className="form-group">
+            <label>Gallery Image URLs (comma-separated)</label>
+            <textarea name="images" className="form-control" rows="3" placeholder="https://..., https://..." onChange={handleChange}></textarea>
           </div>
           <div className="form-group">
             <label>Brand</label>

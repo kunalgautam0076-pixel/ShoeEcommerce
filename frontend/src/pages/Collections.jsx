@@ -4,7 +4,7 @@ import { ProductContext } from '../context/ProductContext';
 
 const Collections = () => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const { products, categories, loading } = useContext(ProductContext);
+  const { products, categories, loading, error } = useContext(ProductContext);
 
   const filteredProducts = activeCategory === 'All' 
     ? products 
@@ -16,6 +16,8 @@ const Collections = () => {
         <h1>Our <span className="highlight">Collections</span></h1>
         <p>Filter products by category</p>
       </div>
+
+      {error && <p className="data-notice" role="status">Live product service is unavailable. Showing demo products.</p>}
       
       <div className="filter-tabs">
         <button 

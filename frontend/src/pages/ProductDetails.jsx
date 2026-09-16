@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Truck, Undo2, X } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
+import { useCart } from '../context/CartContext';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const { products, loading } = useContext(ProductContext);
+  const { products, loading, error } = useContext(ProductContext);
+  const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   
   // Image Zoom States
@@ -21,6 +23,7 @@ const ProductDetails = () => {
   const [sizeUnit, setSizeUnit] = useState('in');
   const [pincode, setPincode] = useState('');
   const [deliveryInfo, setDeliveryInfo] = useState(null);
+  const [addedMessage, setAddedMessage] = useState('');
 
   useEffect(() => {
     if (!loading) {
@@ -83,17 +86,20 @@ const ProductDetails = () => {
     }
   };
 
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      setAddedMessage('Please select a size first.');
+      return;
+    }
+
+    addToCart(product, selectedSize);
+    setAddedMessage(`Added UK ${selectedSize} to your bag.`);
+  };
+
   if (loading) return <div className="page-container container"><p>Loading...</p></div>;
   if (!product) return <div className="page-container container"><p>Product not found.</p></div>;
 
-  // Mocking multiple images for the gallery
-  const galleryImages = [
-    product.image,
-    product.image,
-    product.image,
-    product.image,
-    product.image
-  ];
+  const galleryImages = product.images?.length ? product.images : [product.image];
 
   const handleMouseMove = (e) => {
     // Target the actual image to get perfect undistorted dimensions
@@ -156,6 +162,8 @@ const ProductDetails = () => {
       <div className="breadcrumbs">
         <Link to="/">Home</Link> &gt; <Link to={`/collections?category=${product.category}`}>{product.category}</Link> &gt; <span>{product.name}</span>
       </div>
+
+      {error && <p className="data-notice" role="status">Live product service is unavailable. Showing demo product data.</p>}
 
       <div className="product-layout">
         
@@ -231,13 +239,15 @@ const ProductDetails = () => {
             </div>
 
             <div className="action-buttons">
-              <button className="add-to-bag-btn">
+              <button className="add-to-bag-btn" onClick={handleAddToCart}>
                 Add to Bag
               </button>
               <button className="favourite-btn">
                 Favourite <Heart size={20} />
               </button>
             </div>
+
+            {addedMessage && <p className="cart-feedback" role="status">{addedMessage}</p>}
 
             <div className="product-description">
               <p>{product.description}</p>
