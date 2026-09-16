@@ -281,7 +281,7 @@
 .mini-cart {
   position: fixed;
   top: 108px;
-  right: max(20px, calc((100vw - 1200px) / 2 + 20px));
+  right: 20px;
   z-index: 1100;
   width: min(320px, calc(100vw - 40px));
   max-height: min(70vh, 520px);
