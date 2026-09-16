@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { formatINR } from '../utils/currency';
 import './CartDrawer.css';
 
 const CartDrawer = () => {
+  const navigate = useNavigate();
   const { 
     cartItems, 
     cartTotal, 
@@ -14,6 +15,16 @@ const CartDrawer = () => {
     updateQuantity, 
     removeFromCart 
   } = useCart();
+
+  const handleCheckout = () => {
+    closeCartDrawer();
+    navigate('/checkout');
+  };
+
+  const handleViewCart = () => {
+    closeCartDrawer();
+    navigate('/cart');
+  };
 
   useEffect(() => {
     if (isCartDrawerOpen) {
@@ -88,13 +99,13 @@ const CartDrawer = () => {
               <span>Total:</span>
               <strong>{formatINR(cartTotal)}</strong>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <Link to="/checkout" className="btn-primary btn-block" onClick={closeCartDrawer}>
+            <div className="cart-drawer-actions">
+              <button type="button" className="btn-primary btn-block" onClick={handleCheckout}>
                 Checkout
-              </Link>
-              <Link to="/cart" className="btn-block" style={{ color: 'var(--primary)', textAlign: 'center', fontSize: '0.9rem' }} onClick={closeCartDrawer}>
+              </button>
+              <button type="button" className="cart-drawer-link btn-block" onClick={handleViewCart}>
                 View Full Cart
-              </Link>
+              </button>
             </div>
           </footer>
         )}

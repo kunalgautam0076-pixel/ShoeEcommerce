@@ -154,6 +154,12 @@
   margin-bottom: 15px;
 }
 
+.cart-drawer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .btn-primary {
   background-color: var(--primary);
   color: white;
@@ -165,6 +171,18 @@
   transition: background-color 0.2s;
   text-decoration: none;
   display: inline-block;
+}
+
+.cart-drawer-link {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  text-decoration: none;
 }
 
 .btn-primary:hover {
