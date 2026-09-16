@@ -8,7 +8,8 @@ export const ToastProvider = ({ children }) => {
 
   const showToast = useCallback((message, type = 'success') => {
     const id = Date.now();
-    setToasts((prevToasts) => [...prevToasts, { id, message, type }]);
+    // Keep only 1 toast active at a time to prevent duplicate stacking
+    setToasts([{ id, message, type }]);
 
     setTimeout(() => {
       setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));

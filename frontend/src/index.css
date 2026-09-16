@@ -52,22 +52,39 @@ ul {
 }
 
 .btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 12px 28px;
+  min-height: 48px;
   background-color: var(--primary);
   color: #fff;
   border: none;
   border-radius: 50px;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
   transition: var(--transition);
   font-family: 'Outfit', sans-serif;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+  text-align: center;
 }
 
 .btn:hover {
   background-color: var(--primary-hover);
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn-outline {

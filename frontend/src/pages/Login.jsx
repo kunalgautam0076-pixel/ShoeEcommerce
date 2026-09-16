@@ -51,11 +51,11 @@ const Login = () => {
 
         <form onSubmit={submitHandler} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">Email Address or Phone Number</label>
             <input
-              type="email"
+              type="text"
               id="email"
-              placeholder="you@example.com"
+              placeholder="Email or +91 98765 43210"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

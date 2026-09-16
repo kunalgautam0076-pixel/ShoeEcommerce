@@ -1,29 +1,43 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-
-const CART_STORAGE_KEY = 'shoe-x-cart';
 
 export const CartContext = createContext(null);
 
 const getProductId = (product) => product._id || product.id;
 
-const readStoredCart = () => {
-  try {
-    const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-    return storedCart ? JSON.parse(storedCart) : [];
-  } catch {
-    return [];
-  }
-};
-
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState(readStoredCart);
-  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+  const { user } = useAuth();
   const { showToast } = useToast();
 
+  const userKey = user ? (user._id || user.email || user.phone) : 'guest';
+  const storageKey = `shoe-x-cart_${userKey}`;
+
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
+
+  // Sync cart items whenever active user changes
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-  }, [cartItems]);
+    try {
+      const stored = localStorage.getItem(storageKey);
+      setCartItems(stored ? JSON.parse(stored) : []);
+    } catch {
+      setCartItems([]);
+    }
+  }, [storageKey]);
+
+  // Persist cart changes to the active user's storage key
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(cartItems));
+  }, [cartItems, storageKey]);
 
   const openCartDrawer = () => setIsCartDrawerOpen(true);
   const closeCartDrawer = () => setIsCartDrawerOpen(false);
@@ -32,11 +46,13 @@ export const CartProvider = ({ children }) => {
     const productId = getProductId(product);
     const itemId = `${productId}-${size}`;
 
+    let isExisting = false;
+
     setCartItems((currentItems) => {
       const existingItem = currentItems.find((item) => item.itemId === itemId);
 
       if (existingItem) {
-        showToast(`Increased quantity of ${product.name} (Size: ${size})`, 'success');
+        isExisting = true;
         return currentItems.map((item) => (
           item.itemId === itemId
             ? { ...item, quantity: item.quantity + 1 }
@@ -44,7 +60,7 @@ export const CartProvider = ({ children }) => {
         ));
       }
 
-      showToast(`Added ${product.name} (Size: ${size}) to cart!`, 'success');
+      isExisting = false;
       return [
         ...currentItems,
         {
@@ -60,6 +76,12 @@ export const CartProvider = ({ children }) => {
         }
       ];
     });
+
+    if (isExisting) {
+      showToast(`Increased quantity of ${product.name} (Size: ${size})`, 'success');
+    } else {
+      showToast(`Added ${product.name} (Size: ${size}) to cart!`, 'success');
+    }
   };
 
   const updateQuantity = (itemId, quantity) => {
