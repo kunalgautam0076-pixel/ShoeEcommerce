@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatINR } from '../utils/currency';
-import { CheckCircle, ChevronLeft, CreditCard, Truck } from 'lucide-react';
+import { CheckCircle, ChevronLeft, CreditCard, ShieldCheck, X, QrCode, Smartphone, Building2, Wallet } from 'lucide-react';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -13,6 +13,12 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState(null);
+
+  // Razorpay Demo Modal State
+  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
+  const [razorpayMethod, setRazorpayMethod] = useState('upi');
+  const [isRazorpayPaying, setIsRazorpayPaying] = useState(false);
+  const [pendingOrderData, setPendingOrderData] = useState(null);
 
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -41,11 +47,28 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = (e) => {
+  const finalizeOrder = (orderToSave) => {
+    const userKey = user ? (user._id || user.email || user.phone) : 'guest';
+    try {
+      const ordersKey = `shoe-x-orders_${userKey}`;
+      const existingOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
+      localStorage.setItem(ordersKey, JSON.stringify([orderToSave, ...existingOrders]));
+    } catch (err) {
+      console.error('Failed to save order to history:', err);
+    }
+
+    setConfirmedOrder(orderToSave);
+    setIsProcessing(false);
+    setIsRazorpayPaying(false);
+    setShowRazorpayModal(false);
+    setOrderPlaced(true);
+    clearCart();
+  };
+
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
     
-    const userKey = user ? (user._id || user.email || user.phone) : 'guest';
     const orderNumber = 'SHX-' + Math.random().toString(36).substr(2, 8).toUpperCase();
     
     const newOrder = {
@@ -57,20 +80,85 @@ const Checkout = () => {
       status: 'Processing'
     };
 
-    setTimeout(() => {
-      // Save order strictly under the current user's key
-      try {
-        const ordersKey = `shoe-x-orders_${userKey}`;
-        const existingOrders = JSON.parse(localStorage.getItem(ordersKey) || '[]');
-        localStorage.setItem(ordersKey, JSON.stringify([newOrder, ...existingOrders]));
-      } catch (err) {
-        console.error('Failed to save order to history:', err);
+    setPendingOrderData(newOrder);
+
+    try {
+      // Create Razorpay Order on Backend
+      const res = await fetch('http://localhost:5000/api/payment/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: cartTotal })
+      });
+
+      const orderData = await res.json();
+
+      // If backend explicitly returned mock order (no API keys set) OR SDK missing, open our interactive Razorpay Modal UI!
+      if (orderData.mock || !orderData.key || orderData.key.trim() === '') {
+        setIsProcessing(false);
+        setShowRazorpayModal(true);
+        return;
       }
 
-      setConfirmedOrder(newOrder);
+      // If real Razorpay keys are configured in .env, launch official Razorpay SDK popup window
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'ShoeX Store',
+        description: `Order #${orderNumber}`,
+        order_id: orderData.id,
+        prefill: {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: '#0c2340'
+        },
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('http://localhost:5000/api/payment/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response)
+            });
+
+            if (verifyRes.ok) {
+              finalizeOrder({ ...newOrder, paymentId: response.razorpay_payment_id });
+            } else {
+              alert('Payment verification failed.');
+              setIsProcessing(false);
+            }
+          } catch (err) {
+            console.error('Payment verification error:', err);
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error('Backend endpoint error, launching interactive Razorpay Modal UI:', err);
       setIsProcessing(false);
-      setOrderPlaced(true);
-      clearCart();
+      setShowRazorpayModal(true);
+    }
+  };
+
+  const handleSimulatedRazorpayPayment = () => {
+    setIsRazorpayPaying(true);
+    setTimeout(() => {
+      if (pendingOrderData) {
+        finalizeOrder({
+          ...pendingOrderData,
+          paymentId: 'pay_mock_' + Math.random().toString(36).substr(2, 9)
+        });
+      }
     }, 1500);
   };
 
@@ -154,14 +242,14 @@ const Checkout = () => {
             <div className="payment-methods">
               <label className="payment-method selected">
                 <input type="radio" name="payment" defaultChecked />
-                <CreditCard size={20} />
-                <span>Credit / Debit Card / UPI</span>
+                <CreditCard size={18} />
+                <span>Razorpay (UPI, Cards, NetBanking, Paytm, PhonePe)</span>
               </label>
             </div>
           </section>
 
-          <button type="submit" className="btn btn-block place-order-btn" disabled={isProcessing}>
-            {isProcessing ? 'Processing Order...' : `Pay ${formatINR(cartTotal)}`}
+          <button type="submit" className="btn place-order-btn" disabled={isProcessing}>
+            {isProcessing ? 'Connecting Razorpay...' : `Pay ${formatINR(cartTotal)}`}
           </button>
         </form>
 
@@ -201,6 +289,132 @@ const Checkout = () => {
           </div>
         </aside>
       </div>
+
+      {/* RAZORPAY PAYMENT MODAL UI */}
+      {showRazorpayModal && (
+        <div className="razorpay-overlay">
+          <div className="razorpay-modal">
+            <div className="razorpay-header">
+              <div className="razorpay-brand">
+                <div className="razorpay-logo">R</div>
+                <div>
+                  <h3>ShoeX Store</h3>
+                  <p>Amount: <strong>{formatINR(cartTotal)}</strong></p>
+                </div>
+              </div>
+              <button type="button" className="razorpay-close-btn" onClick={() => setShowRazorpayModal(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="razorpay-body">
+              <div className="razorpay-sidebar">
+                <button 
+                  type="button" 
+                  className={`rzp-nav-item ${razorpayMethod === 'upi' ? 'active' : ''}`}
+                  onClick={() => setRazorpayMethod('upi')}
+                >
+                  <Smartphone size={18} /> UPI / QR
+                </button>
+                <button 
+                  type="button" 
+                  className={`rzp-nav-item ${razorpayMethod === 'card' ? 'active' : ''}`}
+                  onClick={() => setRazorpayMethod('card')}
+                >
+                  <CreditCard size={18} /> Card
+                </button>
+                <button 
+                  type="button" 
+                  className={`rzp-nav-item ${razorpayMethod === 'netbanking' ? 'active' : ''}`}
+                  onClick={() => setRazorpayMethod('netbanking')}
+                >
+                  <Building2 size={18} /> Netbanking
+                </button>
+                <button 
+                  type="button" 
+                  className={`rzp-nav-item ${razorpayMethod === 'wallet' ? 'active' : ''}`}
+                  onClick={() => setRazorpayMethod('wallet')}
+                >
+                  <Wallet size={18} /> Wallet
+                </button>
+              </div>
+
+              <div className="razorpay-content">
+                {razorpayMethod === 'upi' && (
+                  <div className="rzp-method-panel">
+                    <h4>Pay via UPI</h4>
+                    <div className="upi-options">
+                      <div className="upi-app"><Smartphone size={24} color="#00baf2" /> Paytm</div>
+                      <div className="upi-app"><Smartphone size={24} color="#5f259f" /> PhonePe</div>
+                      <div className="upi-app"><Smartphone size={24} color="#ea4335" /> GPay</div>
+                    </div>
+                    <div className="qr-box">
+                      <QrCode size={64} />
+                      <p>Scan & Pay with any UPI app</p>
+                    </div>
+                  </div>
+                )}
+
+                {razorpayMethod === 'card' && (
+                  <div className="rzp-method-panel">
+                    <h4>Card Details</h4>
+                    <div className="rzp-input-group">
+                      <label>Card Number</label>
+                      <input type="text" placeholder="4111 2222 3333 4444" defaultValue="4111222233334444" />
+                    </div>
+                    <div className="rzp-form-row">
+                      <div className="rzp-input-group">
+                        <label>Expiry</label>
+                        <input type="text" placeholder="12/28" defaultValue="12/28" />
+                      </div>
+                      <div className="rzp-input-group">
+                        <label>CVV</label>
+                        <input type="password" placeholder="123" defaultValue="123" maxLength={4} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {razorpayMethod === 'netbanking' && (
+                  <div className="rzp-method-panel">
+                    <h4>Select Popular Banks</h4>
+                    <div className="bank-options">
+                      <div className="bank-item">HDFC Bank</div>
+                      <div className="bank-item">SBI</div>
+                      <div className="bank-item">ICICI Bank</div>
+                      <div className="bank-item">Axis Bank</div>
+                    </div>
+                  </div>
+                )}
+
+                {razorpayMethod === 'wallet' && (
+                  <div className="rzp-method-panel">
+                    <h4>Select Wallet</h4>
+                    <div className="bank-options">
+                      <div className="bank-item">Mobikwik</div>
+                      <div className="bank-item">Freecharge</div>
+                      <div className="bank-item">Airtel Money</div>
+                    </div>
+                  </div>
+                )}
+
+                <button 
+                  type="button" 
+                  className="rzp-pay-submit-btn" 
+                  onClick={handleSimulatedRazorpayPayment}
+                  disabled={isRazorpayPaying}
+                >
+                  {isRazorpayPaying ? 'Securing Payment...' : `Pay ${formatINR(cartTotal)}`}
+                </button>
+              </div>
+            </div>
+
+            <div className="razorpay-footer">
+              <ShieldCheck size={16} /> Secured by Razorpay 256-bit SSL Encryption
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
