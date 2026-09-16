@@ -22,10 +22,11 @@
 
 .product-layout {
   display: grid;
-  grid-template-columns: 80px minmax(0, 1fr) minmax(320px, 400px);
+  grid-template-columns: 80px minmax(0, 1.55fr) minmax(340px, 1fr);
   gap: 30px;
   position: relative;
   align-items: start;
+  min-width: 0;
 }
 
 /* Left: Thumbnails */
@@ -36,6 +37,7 @@
   position: sticky;
   top: 140px;
   align-self: start;
+  min-width: 0;
 }
 
 .thumbnail-box {
@@ -73,6 +75,7 @@
   position: sticky;
   top: 140px;
   align-self: start;
+  min-width: 0;
 }
 
 .image-wrapper {
@@ -106,6 +109,7 @@
 /* Right: Product Info */
 .product-info-container {
   position: relative;
+  min-width: 0;
 }
 
 .zoom-portal {
@@ -113,7 +117,8 @@
   top: 140px;
   right: max(16px, calc((100vw - 1200px) / 2 + 20px));
   width: min(400px, 30vw);
-  height: min(400px, calc(100vh - 180px));
+  height: auto;
+  aspect-ratio: 1;
   min-height: 0;
   max-height: none;
   background-color: var(--bg-dark-secondary);
