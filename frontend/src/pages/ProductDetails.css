@@ -336,6 +336,13 @@
 
 .mini-cart-items {
   display: grid;
+  max-height: 208px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.mini-cart-items::-webkit-scrollbar {
+  display: none;
 }
 
 .mini-cart-product {
