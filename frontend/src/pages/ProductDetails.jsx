@@ -31,6 +31,7 @@ const ProductDetails = () => {
   const [showMobileStickyAdd, setShowMobileStickyAdd] = useState(true);
   const [showPurchaseLimit, setShowPurchaseLimit] = useState(false);
   const actionButtonsRef = useRef(null);
+  const touchStartX = useRef(null);
   const [isFavourite, setIsFavourite] = useState(false);
 
   useEffect(() => {
@@ -57,6 +58,19 @@ const ProductDetails = () => {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [showSizeGuide]);
+
+  useEffect(() => {
+    const galleryLength = product?.images?.length || 4;
+    if (!product || galleryLength < 2 || !window.matchMedia('(max-width: 768px)').matches) {
+      return undefined;
+    }
+
+    const rotationTimer = window.setInterval(() => {
+      setSelectedImgIndex((currentIndex) => (currentIndex + 1) % galleryLength);
+    }, 3500);
+
+    return () => window.clearInterval(rotationTimer);
+  }, [product]);
 
   const handleCheckPincode = async () => {
     if (!pincode || pincode.trim().length < 5) {
@@ -161,7 +175,12 @@ const ProductDetails = () => {
   if (loading) return <div className="page-container container"><p>Loading...</p></div>;
   if (!product) return <div className="page-container container"><p>Product not found.</p></div>;
 
-  const galleryImages = product.images?.length ? product.images : [product.image];
+  const galleryImages = product.images?.length ? product.images : [
+    product.image,
+    `${product.image}&fit=crop&crop=center`,
+    `${product.image}&fit=crop&crop=entropy`,
+    `${product.image}&fit=crop&crop=faces`
+  ];
 
   const handleMouseMove = (e) => {
     // Target the actual image to get perfect undistorted dimensions
@@ -208,6 +227,25 @@ const ProductDetails = () => {
     });
   };
 
+  const handleTouchStart = (event) => {
+    touchStartX.current = event.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (event) => {
+    if (touchStartX.current === null || galleryImages.length < 2) return;
+
+    const swipeDistance = event.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(swipeDistance) > 45) {
+      setSelectedImgIndex((currentIndex) => (
+        swipeDistance < 0
+          ? (currentIndex + 1) % galleryImages.length
+          : (currentIndex - 1 + galleryImages.length) % galleryImages.length
+      ));
+    }
+
+    touchStartX.current = null;
+  };
+
   const defaultSizes = [6, 7, 8, 9, 10, 11, 12];
   const sizeGuideRows = [
     { uk: 'UK 6 (EU 40)', inches: '9.6', cm: '24.5', us: '7', eu: '40', jp: '25' },
@@ -244,6 +282,7 @@ const ProductDetails = () => {
 
         {/* Middle: Main Image */}
         <div className="main-image-container">
+          <h2 className="mobile-gallery-title">{product.name}</h2>
           <div 
             className="image-wrapper"
             onMouseEnter={() => setShowZoom(true)}
@@ -253,9 +292,24 @@ const ProductDetails = () => {
               setZoomStyle({ display: 'none' });
             }}
             onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <img src={galleryImages[selectedImgIndex]} alt={product.name} className="main-image" />
             <div className="zoom-lens" style={lensStyle}></div>
+            {galleryImages.length > 1 && (
+              <div className="mobile-image-dots" aria-label="Product image carousel">
+                {galleryImages.map((image, index) => (
+                  <button
+                    key={`${image}-${index}`}
+                    type="button"
+                    className={selectedImgIndex === index ? 'active' : ''}
+                    onClick={() => setSelectedImgIndex(index)}
+                    aria-label={`View product image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
