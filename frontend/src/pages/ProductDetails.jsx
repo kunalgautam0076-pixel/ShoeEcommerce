@@ -8,7 +8,7 @@ import './ProductDetails.css';
 const ProductDetails = () => {
   const { id } = useParams();
   const { products, loading, error } = useContext(ProductContext);
-  const { addToCart, cartItems, updateQuantity } = useCart();
+  const { addToCart, cartItems, updateQuantity, removeFromCart, cartTotal } = useCart();
   const [product, setProduct] = useState(null);
   
   // Image Zoom States
@@ -324,43 +324,45 @@ const ProductDetails = () => {
         </div>
       </div>
 
-      {showMiniCart && selectedSize && (() => {
-        const productId = product._id || product.id;
-        const miniCartItem = cartItems.find((item) => item.productId === productId && item.size === selectedSize);
-
-        if (!miniCartItem) return null;
-
-        return (
-          <aside className="mini-cart" aria-label="Added product preview">
-            <div className="mini-cart-header">
-              <span><ShoppingCart size={17} /> Added to bag</span>
-              <button type="button" onClick={() => setShowMiniCart(false)} aria-label="Close added product preview">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="mini-cart-product">
-              <img src={miniCartItem.image} alt={miniCartItem.name} />
-              <div>
-                <strong>{miniCartItem.name}</strong>
-                <span>UK {miniCartItem.size}</span>
-                <span>${miniCartItem.price.toFixed(2)}</span>
+      {showMiniCart && cartItems.length > 0 && (
+        <aside className="mini-cart" aria-label="Shopping bag preview">
+          <div className="mini-cart-header">
+            <span><ShoppingCart size={17} /> Your bag ({cartItems.length})</span>
+            <button type="button" onClick={() => setShowMiniCart(false)} aria-label="Close shopping bag preview">
+              <X size={18} />
+            </button>
+          </div>
+          <div className="mini-cart-items">
+            {cartItems.map((item) => (
+              <div className="mini-cart-product" key={item.itemId}>
+                <img src={item.image} alt={item.name} />
+                <div className="mini-cart-product-details">
+                  <strong>{item.name}</strong>
+                  <span>UK {item.size}</span>
+                  <span>${item.price.toFixed(2)}</span>
+                  <div className="mini-cart-item-footer">
+                    <div className="mini-quantity" aria-label={`Quantity for ${item.name}`}>
+                      <button type="button" onClick={() => updateQuantity(item.itemId, item.quantity - 1)} aria-label="Decrease quantity">
+                        <Minus size={14} />
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button type="button" onClick={() => updateQuantity(item.itemId, item.quantity + 1)} aria-label="Increase quantity">
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    <button className="mini-remove" type="button" onClick={() => removeFromCart(item.itemId)}>Remove</button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="mini-cart-footer">
-              <div className="mini-quantity" aria-label="Mini cart quantity">
-                <button type="button" onClick={() => updateQuantity(miniCartItem.itemId, miniCartItem.quantity - 1)} aria-label="Decrease quantity">
-                  <Minus size={14} />
-                </button>
-                <span>{miniCartItem.quantity}</span>
-                <button type="button" onClick={() => updateQuantity(miniCartItem.itemId, miniCartItem.quantity + 1)} aria-label="Increase quantity">
-                  <Plus size={14} />
-                </button>
-              </div>
-              <Link className="mini-cart-link" to="/cart" onClick={() => setShowMiniCart(false)}>View Bag</Link>
-            </div>
-          </aside>
-        );
-      })()}
+            ))}
+          </div>
+          <div className="mini-cart-total">
+            <span>Total</span>
+            <strong>${cartTotal.toFixed(2)}</strong>
+          </div>
+          <Link className="mini-cart-link" to="/cart" onClick={() => setShowMiniCart(false)}>View Bag</Link>
+        </aside>
+      )}
 
       {showSizeGuide && (
         <div

@@ -284,11 +284,18 @@
   right: max(20px, calc((100vw - 1200px) / 2 + 20px));
   z-index: 1100;
   width: min(320px, calc(100vw - 40px));
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  scrollbar-width: none;
   padding: 16px;
   border: 1px solid var(--glass-border);
   border-radius: 14px;
   background: rgba(30, 41, 59, 0.97);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+}
+
+.mini-cart::-webkit-scrollbar {
+  display: none;
 }
 
 .mini-cart-header,
@@ -327,12 +334,17 @@
   color: var(--text-light);
 }
 
+.mini-cart-items {
+  display: grid;
+}
+
 .mini-cart-product {
   display: grid;
   grid-template-columns: 68px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   padding: 14px 0;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .mini-cart-product img {
@@ -343,27 +355,35 @@
   object-fit: cover;
 }
 
-.mini-cart-product div {
+.mini-cart-product-details {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
-.mini-cart-product strong,
-.mini-cart-product span {
+.mini-cart-product-details strong,
+.mini-cart-product-details > span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.mini-cart-product strong {
+.mini-cart-product-details strong {
   color: var(--text-light);
   font-size: 0.95rem;
 }
 
-.mini-cart-product span {
+.mini-cart-product-details > span {
   color: var(--text-muted);
   font-size: 0.82rem;
+}
+
+.mini-cart-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 7px;
 }
 
 .mini-quantity {
@@ -393,8 +413,42 @@
 }
 
 .mini-cart-link {
+  display: block;
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mini-cart-link:hover {
+  background: var(--primary-hover);
+}
+
+.mini-remove {
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--primary);
   font-size: 0.9rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.mini-remove:hover {
+  color: var(--text-light);
+}
+
+.mini-cart-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  color: var(--text-light);
+  font-size: 1rem;
   font-weight: 700;
 }
 
