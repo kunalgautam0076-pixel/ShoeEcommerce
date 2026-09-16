@@ -167,7 +167,7 @@ const ProductDetails = () => {
           
           {/* Zoom Portal overlay - shows up when hovering main image */}
           {showZoom && (
-            <div className="zoom-portal" style={zoomStyle} ref={portalRef}></div>
+            <div className="zoom-portal" style={zoomStyle}></div>
           )}
 
           {/* Normal Info */}
