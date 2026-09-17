@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Collections from './pages/Collections';
@@ -16,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 function App() {
   return (
     <>
+      <ScrollToTop />
       <Navbar />
       <CartDrawer />
       <Routes>
