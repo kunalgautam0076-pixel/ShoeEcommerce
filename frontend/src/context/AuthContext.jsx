@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useToast } from './ToastContext';
+import { API_BASE_URL } from '../config/api';
 
 export const AuthContext = createContext(null);
 
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       try {
         data = JSON.parse(text);
       } catch (e) {
-        throw new Error('Backend server is not running on port 5000.');
+        throw new Error('Backend server is unreachable.');
       }
       
       if (!res.ok) {
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData)

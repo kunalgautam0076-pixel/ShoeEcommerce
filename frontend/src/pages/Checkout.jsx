@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatINR } from '../utils/currency';
+import { API_BASE_URL } from '../config/api';
 import { CheckCircle, ChevronLeft, CreditCard, ShieldCheck, X, QrCode, Smartphone, Building2, Wallet } from 'lucide-react';
 import './Checkout.css';
 
@@ -47,7 +48,33 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const finalizeOrder = (orderToSave) => {
+  const finalizeOrder = async (orderToSave) => {
+    const payload = {
+      userId: user?._id || null,
+      orderNumber: orderToSave.orderNumber,
+      customerName: `${formData.firstName || user?.firstName || ''} ${formData.lastName || user?.lastName || ''}`.trim() || 'Guest Customer',
+      email: formData.email || user?.email || '',
+      phone: formData.phone || user?.phone || '',
+      items: orderToSave.items.map(item => ({
+        productId: item._id || item.productId || item.id || '',
+        name: item.name,
+        image: item.image,
+        price: Number(item.price || 0),
+        quantity: Number(item.quantity || 1),
+        size: Number(item.size || 8),
+      })),
+      total: Number(orderToSave.total || 0),
+      shippingAddress: {
+        firstName: formData.firstName || user?.firstName || '',
+        lastName: formData.lastName || user?.lastName || '',
+        address: formData.address || '',
+        city: formData.city || '',
+        postalCode: formData.postalCode || ''
+      },
+      status: orderToSave.status || 'Processing',
+      paymentId: orderToSave.paymentId || '',
+    };
+
     const userKey = user ? (user._id || user.email || user.phone) : 'guest';
     try {
       const ordersKey = `shoe-x-orders_${userKey}`;
@@ -55,6 +82,16 @@ const Checkout = () => {
       localStorage.setItem(ordersKey, JSON.stringify([orderToSave, ...existingOrders]));
     } catch (err) {
       console.error('Failed to save order to history:', err);
+    }
+
+    try {
+      await fetch(`${API_BASE_URL}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error('Failed to sync order with backend:', err);
     }
 
     setConfirmedOrder(orderToSave);
@@ -84,7 +121,7 @@ const Checkout = () => {
 
     try {
       // Create Razorpay Order on Backend
-      const res = await fetch('http://localhost:5000/api/payment/create-order', {
+      const res = await fetch(`${API_BASE_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: cartTotal })
@@ -117,7 +154,7 @@ const Checkout = () => {
         },
         handler: async function (response) {
           try {
-            const verifyRes = await fetch('http://localhost:5000/api/payment/verify-payment', {
+            const verifyRes = await fetch(`${API_BASE_URL}/api/payment/verify-payment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(response)

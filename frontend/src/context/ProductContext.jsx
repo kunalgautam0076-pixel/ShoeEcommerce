@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { categories as fallbackCategories, products as fallbackProducts } from '../data';
+import { API_BASE_URL } from '../config/api';
 
 export const ProductContext = createContext();
 
@@ -13,8 +14,8 @@ export const ProductProvider = ({ children }) => {
     const fetchProducts = async () => {
       try {
         const [productsResponse, categoriesResponse] = await Promise.all([
-          fetch('http://localhost:5000/api/products'),
-          fetch('http://localhost:5000/api/products/categories')
+          fetch(`${API_BASE_URL}/api/products`),
+          fetch(`${API_BASE_URL}/api/products/categories`)
         ]);
 
         if (!productsResponse.ok || !categoriesResponse.ok) {

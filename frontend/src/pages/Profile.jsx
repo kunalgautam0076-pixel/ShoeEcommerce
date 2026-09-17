@@ -14,15 +14,37 @@ const Profile = () => {
   const userKey = user ? (user._id || user.email || user.phone) : 'guest';
 
   useEffect(() => {
-    if (userKey) {
+    const loadUserOrders = async () => {
+      if (!user?._id) {
+        try {
+          const stored = localStorage.getItem(`shoe-x-orders_${userKey}`);
+          setUserOrders(stored ? JSON.parse(stored) : []);
+        } catch {
+          setUserOrders([]);
+        }
+        return;
+      }
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/orders/user/${user._id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const orders = Array.isArray(data.orders) ? data.orders : [];
+          setUserOrders(orders);
+          return;
+        }
+      } catch {}
+
       try {
         const stored = localStorage.getItem(`shoe-x-orders_${userKey}`);
         setUserOrders(stored ? JSON.parse(stored) : []);
       } catch {
         setUserOrders([]);
       }
-    }
-  }, [userKey]);
+    };
+
+    loadUserOrders();
+  }, [user, userKey]);
 
   const handleLogout = () => {
     logout();
