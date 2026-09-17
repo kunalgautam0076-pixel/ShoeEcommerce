@@ -30,7 +30,6 @@ const Navbar = () => {
           <li><Link to="/shop" onClick={closeMenu}>Shop</Link></li>
           <li><Link to="/collections" onClick={closeMenu}>Collections</Link></li>
           <li><Link to="/about" onClick={closeMenu}>About</Link></li>
-          <li><Link to="/admin" onClick={closeMenu} style={{ color: 'var(--primary)', fontWeight: '600' }}>Admin</Link></li>
         </ul>
 
         <div className="nav-icons">

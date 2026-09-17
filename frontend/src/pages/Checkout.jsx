@@ -53,8 +53,8 @@ const Checkout = () => {
       userId: user?._id || null,
       orderNumber: orderToSave.orderNumber,
       customerName: `${formData.firstName || user?.firstName || ''} ${formData.lastName || user?.lastName || ''}`.trim() || 'Guest Customer',
-      email: formData.email || user?.email || '',
-      phone: formData.phone || user?.phone || '',
+      customerEmail: formData.email || user?.email || '',
+      customerPhone: formData.phone || user?.phone || '',
       items: orderToSave.items.map(item => ({
         productId: item._id || item.productId || item.id || '',
         name: item.name,
@@ -63,10 +63,8 @@ const Checkout = () => {
         quantity: Number(item.quantity || 1),
         size: Number(item.size || 8),
       })),
-      total: Number(orderToSave.total || 0),
+      totalAmount: Number(orderToSave.total || 0),
       shippingAddress: {
-        firstName: formData.firstName || user?.firstName || '',
-        lastName: formData.lastName || user?.lastName || '',
         address: formData.address || '',
         city: formData.city || '',
         postalCode: formData.postalCode || ''

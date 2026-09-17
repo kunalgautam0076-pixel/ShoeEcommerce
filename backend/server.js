@@ -33,12 +33,15 @@ connectDB().then(async () => {
   }
 });
 
+const { getStoreSettings } = require('./src/controllers/adminController');
+
 // Routes
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/products', require('./src/routes/product'));
 app.use('/api/payment', require('./src/routes/payment'));
 app.use('/api/orders', require('./src/routes/order'));
 app.use('/api/admin', require('./src/routes/admin'));
+app.get('/api/settings', getStoreSettings);
 
 app.get('/', (req, res) => res.send('API is running...'));
 

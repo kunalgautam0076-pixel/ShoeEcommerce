@@ -1,72 +1,62 @@
 const Order = require('../models/Order');
 
+// @desc    Create new order
+// @route   POST /api/orders
+// @access  Public / Private
 const createOrder = async (req, res) => {
   try {
     const {
-      userId,
       orderNumber,
       customerName,
-      email,
-      phone,
-      items,
-      total,
+      customerEmail,
+      customerPhone,
       shippingAddress,
-      status,
+      items,
+      totalAmount,
       paymentId,
+      userId
     } = req.body;
 
-    if (!orderNumber || !customerName || !items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Order details are incomplete.' });
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: 'No order items' });
     }
 
-    const normalizedOrder = {
-      user: userId || null,
-      orderNumber,
-      customerName,
-      email: email || '',
-      phone: phone || '',
-      items: items.map((item) => ({
-        productId: item.productId || item._id || '',
-        name: item.name,
-        image: item.image || '',
-        price: Number(item.price || 0),
-        quantity: Number(item.quantity || 1),
-        size: item.size || 8,
-      })),
-      total: Number(total || 0),
-      shippingAddress: shippingAddress || {},
-      paymentId: paymentId || '',
-      status: status || 'Processing',
-      date: new Date(),
-    };
+    const order = new Order({
+      orderNumber: orderNumber || 'SHX-' + Math.random().toString(36).substr(2, 8).toUpperCase(),
+      user: userId || undefined,
+      customerName: customerName || 'Guest Customer',
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      items,
+      totalAmount,
+      paymentId,
+      status: 'Processing'
+    });
 
-    const order = await Order.create(normalizedOrder);
-
-    res.status(201).json(order);
+    const createdOrder = await order.save();
+    res.status(201).json(createdOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-const getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
+// @desc    Get user orders
+// @route   GET /api/orders/myorders
+// @access  Public / Private
 const getUserOrders = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { email, phone } = req.query;
+    const query = [];
+    if (email) query.push({ customerEmail: email });
+    if (phone) query.push({ customerPhone: phone });
 
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID is required.' });
+    if (query.length === 0) {
+      return res.json([]);
     }
 
-    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
-    res.json({ orders });
+    const orders = await Order.find({ $or: query }).sort({ createdAt: -1 });
+    res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -74,6 +64,5 @@ const getUserOrders = async (req, res) => {
 
 module.exports = {
   createOrder,
-  getAllOrders,
-  getUserOrders,
+  getUserOrders
 };
